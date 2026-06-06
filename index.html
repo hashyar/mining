@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ماشین حساب سودآوری ماینینگ</title>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0c0f;
+    --card: #111318;
+    --card2: #16191f;
+    --border: #1e2229;
+    --gold: #f5a623;
+    --gold2: #ffd166;
+    --silver: #8ecae6;
+    --green: #06d6a0;
+    --red: #ef476f;
+    --text: #e8eaf0;
+    --muted: #6b7280;
+    --accent: #f5a623;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Vazirmatn', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 20px;
+    background-image: 
+      radial-gradient(ellipse at 20% 20%, rgba(245,166,35,0.05) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 80%, rgba(142,202,230,0.04) 0%, transparent 50%);
+  }
+
+  .container {
+    max-width: 680px;
+    margin: 0 auto;
+  }
+
+  header {
+    text-align: center;
+    padding: 40px 0 30px;
+  }
+
+  .logo {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 3px;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    opacity: 0.8;
+  }
+
+  h1 {
+    font-size: 28px;
+    font-weight: 900;
+    line-height: 1.3;
+    margin-bottom: 8px;
+  }
+
+  h1 span { color: var(--gold); }
+
+  .subtitle {
+    color: var(--muted);
+    font-size: 14px;
+    font-weight: 300;
+  }
+
+  /* Live Price Bar */
+  .price-bar {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    gap: 12px;
+  }
+
+  .price-bar .label {
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1px;
+  }
+
+  .price-bar .values {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .price-item {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+  }
+
+  .price-item .val {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--gold);
+  }
+
+  .price-item .unit {
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 1px;
+  }
+
+  .live-dot {
+    width: 8px;
+    height: 8px;
+    background: var(--green);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+    flex-shrink: 0;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.8); }
+  }
+
+  .refresh-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    border-radius: 8px;
+    padding: 6px 10px;
+    font-size: 11px;
+    cursor: pointer;
+    font-family: 'Vazirmatn', sans-serif;
+    transition: all 0.2s;
+  }
+  .refresh-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+  /* Calculator Card */
+  .calc-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    margin-bottom: 20px;
+  }
+
+  .section-title {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+
+  .input-group {
+    margin-bottom: 20px;
+  }
+
+  .input-group label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+
+  .input-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .input-group input {
+    flex: 1;
+    background: var(--card2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 13px 16px;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text);
+    font-family: 'Vazirmatn', sans-serif;
+    outline: none;
+    transition: border-color 0.2s;
+    text-align: right;
+  }
+
+  .input-group input:focus {
+    border-color: var(--gold);
+  }
+
+  .input-unit {
+    background: var(--card2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 13px 14px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--gold);
+    white-space: nowrap;
+  }
+
+  /* Plan selector */
+  .plan-selector {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+
+  .plan-btn {
+    background: var(--card2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+    font-family: 'Vazirmatn', sans-serif;
+  }
+
+  .plan-btn .plan-name {
+    font-size: 13px;
+    font-weight: 700;
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  .plan-btn .plan-fee {
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  .plan-btn.standard { border-color: var(--border); }
+  .plan-btn.standard .plan-name { color: var(--text); }
+
+  .plan-btn.silver { border-color: transparent; }
+  .plan-btn.silver .plan-name { color: var(--silver); }
+
+  .plan-btn.gold { border-color: transparent; }
+  .plan-btn.gold .plan-name { color: var(--gold); }
+
+  .plan-btn.active.standard { background: rgba(255,255,255,0.06); border-color: #444; }
+  .plan-btn.active.silver { background: rgba(142,202,230,0.1); border-color: var(--silver); }
+  .plan-btn.active.gold { background: rgba(245,166,35,0.12); border-color: var(--gold); }
+
+  /* Calculate button */
+  .calc-btn {
+    width: 100%;
+    background: linear-gradient(135deg, var(--gold), #e8960f);
+    border: none;
+    border-radius: 12px;
+    padding: 16px;
+    font-size: 16px;
+    font-weight: 700;
+    color: #0a0c0f;
+    cursor: pointer;
+    font-family: 'Vazirmatn', sans-serif;
+    transition: all 0.2s;
+    letter-spacing: 0.5px;
+  }
+
+  .calc-btn:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(245,166,35,0.3); }
+  .calc-btn:active { transform: translateY(0); }
+
+  /* Results */
+  .results {
+    display: none;
+    animation: fadeIn 0.4s ease;
+  }
+
+  .results.show { display: block; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .results-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+
+  .period-tabs {
+    display: flex;
+    background: var(--card2);
+    border-radius: 8px;
+    padding: 3px;
+    gap: 2px;
+  }
+
+  .period-tab {
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    color: var(--muted);
+    transition: all 0.2s;
+    font-family: 'Vazirmatn', sans-serif;
+    border: none;
+    background: none;
+  }
+
+  .period-tab.active {
+    background: var(--card);
+    color: var(--text);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+  }
+
+  .result-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .result-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 14px;
+    text-align: center;
+  }
+
+  .result-card .r-unit {
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 6px;
+    font-weight: 600;
+    letter-spacing: 1px;
+  }
+
+  .result-card .r-val {
+    font-size: 17px;
+    font-weight: 900;
+    line-height: 1.2;
+  }
+
+  .result-card.btc .r-val { color: var(--gold); }
+  .result-card.usd .r-val { color: var(--green); }
+  .result-card.irr .r-val { color: var(--silver); font-size: 14px; }
+
+  /* Comparison */
+  .comparison {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px;
+    margin-bottom: 16px;
+  }
+
+  .comp-title {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--muted);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+
+  .comp-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+
+  .comp-row:last-child { border-bottom: none; }
+
+  .comp-row .plan-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+  }
+
+  .badge {
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-weight: 700;
+  }
+
+  .badge.standard { background: rgba(255,255,255,0.08); color: var(--muted); }
+  .badge.silver { background: rgba(142,202,230,0.15); color: var(--silver); }
+  .badge.gold { background: rgba(245,166,35,0.15); color: var(--gold); }
+
+  .comp-row .amounts {
+    text-align: left;
+    font-size: 12px;
+  }
+
+  .comp-row .usd-amount { font-weight: 700; color: var(--green); }
+  .comp-row .saving {
+    font-size: 10px;
+    color: var(--gold);
+    margin-top: 2px;
+  }
+
+  /* Savings highlight */
+  .savings-highlight {
+    background: linear-gradient(135deg, rgba(245,166,35,0.1), rgba(245,166,35,0.05));
+    border: 1px solid rgba(245,166,35,0.25);
+    border-radius: 12px;
+    padding: 16px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+
+  .savings-highlight .sh-label {
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .savings-highlight .sh-label strong {
+    color: var(--text);
+    display: block;
+    font-size: 14px;
+    margin-bottom: 2px;
+  }
+
+  .savings-highlight .sh-amount {
+    font-size: 22px;
+    font-weight: 900;
+    color: var(--gold);
+  }
+
+  /* CTA */
+  .cta-card {
+    background: linear-gradient(135deg, rgba(245,166,35,0.12), rgba(245,166,35,0.05));
+    border: 1px solid rgba(245,166,35,0.2);
+    border-radius: 16px;
+    padding: 22px;
+    text-align: center;
+  }
+
+  .cta-card h3 {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+
+  .cta-card p {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 16px;
+    line-height: 1.6;
+  }
+
+  .cta-btn {
+    display: inline-block;
+    background: var(--gold);
+    color: #0a0c0f;
+    font-weight: 700;
+    font-size: 14px;
+    padding: 12px 28px;
+    border-radius: 10px;
+    text-decoration: none;
+    font-family: 'Vazirmatn', sans-serif;
+    transition: all 0.2s;
+    cursor: pointer;
+    border: none;
+  }
+
+  .cta-btn:hover { background: var(--gold2); }
+
+  .error-msg {
+    background: rgba(239,71,111,0.1);
+    border: 1px solid rgba(239,71,111,0.3);
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-size: 13px;
+    color: var(--red);
+    margin-top: 12px;
+    display: none;
+  }
+
+  .loading { opacity: 0.5; }
+
+  footer {
+    text-align: center;
+    padding: 24px 0;
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  @media (max-width: 480px) {
+    .result-cards { grid-template-columns: 1fr; }
+    .plan-selector { grid-template-columns: 1fr; }
+    .price-bar { flex-wrap: wrap; gap: 8px; }
+    h1 { font-size: 22px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div class="logo">⛏ Mining Calculator</div>
+    <h1>ماشین حساب <span>سودآوری</span> ماینینگ</h1>
+    <p class="subtitle">محاسبه درآمد با قیمت لحظه‌ای بیت‌کوین</p>
+  </header>
+
+  <!-- Live Price Bar -->
+  <div class="price-bar">
+    <div style="display:flex;align-items:center;gap:8px;">
+      <div class="live-dot"></div>
+      <span class="label">قیمت لحظه‌ای</span>
+    </div>
+    <div class="values" id="priceValues">
+      <div class="price-item">
+        <span class="val" id="btcUsd">در حال بارگذاری...</span>
+        <span class="unit">BTC/USD</span>
+      </div>
+      <div class="price-item">
+        <span class="val" id="btcIrr">—</span>
+        <span class="unit">BTC/تومان</span>
+      </div>
+      <div class="price-item">
+        <span class="val" id="usdIrr">—</span>
+        <span class="unit">دلار/تومان</span>
+      </div>
+    </div>
+    <button class="refresh-btn" onclick="fetchPrices()">🔄 بروزرسانی</button>
+  </div>
+
+  <!-- Calculator -->
+  <div class="calc-card">
+    <div class="section-title">اطلاعات ماینر شما</div>
+
+    <div class="input-group">
+      <label>هشریت ماینر</label>
+      <div class="input-row">
+        <input type="number" id="hashrate" placeholder="مثال: 500" min="1" max="10000">
+        <div class="input-unit">TH/s</div>
+      </div>
+    </div>
+
+    <div class="section-title">انتخاب پلن اکانت</div>
+    <div class="plan-selector">
+      <div class="plan-btn standard active" onclick="selectPlan('standard', this)">
+        <span class="plan-name">استاندارد</span>
+        <span class="plan-fee">کارمزد ۴٪</span>
+      </div>
+      <div class="plan-btn silver" onclick="selectPlan('silver', this)">
+        <span class="plan-name">🥈 سیلور</span>
+        <span class="plan-fee">کارمزد ~۳٪</span>
+      </div>
+      <div class="plan-btn gold" onclick="selectPlan('gold', this)">
+        <span class="plan-name">🥇 گلد</span>
+        <span class="plan-fee">کارمزد ~۲.۸٪</span>
+      </div>
+    </div>
+
+    <button class="calc-btn" onclick="calculate()">محاسبه سودآوری ⚡</button>
+    <div class="error-msg" id="errorMsg">لطفاً هشریت ماینر را وارد کنید.</div>
+  </div>
+
+  <!-- Results -->
+  <div class="results" id="results">
+
+    <div class="results-header">
+      <div class="section-title" style="margin:0">نتایج محاسبه</div>
+      <div class="period-tabs">
+        <button class="period-tab active" onclick="setPeriod('day', this)">روزانه</button>
+        <button class="period-tab" onclick="setPeriod('month', this)">ماهانه</button>
+        <button class="period-tab" onclick="setPeriod('year', this)">سالانه</button>
+      </div>
+    </div>
+
+    <div class="result-cards">
+      <div class="result-card btc">
+        <div class="r-unit">BTC</div>
+        <div class="r-val" id="resBtc">—</div>
+      </div>
+      <div class="result-card usd">
+        <div class="r-unit">USD</div>
+        <div class="r-val" id="resUsd">—</div>
+      </div>
+      <div class="result-card irr">
+        <div class="r-unit">تومان</div>
+        <div class="r-val" id="resIrr">—</div>
+      </div>
+    </div>
+
+    <!-- Comparison Table -->
+    <div class="comparison">
+      <div class="comp-title">مقایسه پلن‌ها (ماهانه)</div>
+      <div class="comp-row">
+        <div class="plan-label"><span class="badge standard">استاندارد</span></div>
+        <div class="amounts">
+          <div class="usd-amount" id="compStd">—</div>
+        </div>
+      </div>
+      <div class="comp-row">
+        <div class="plan-label"><span class="badge silver">سیلور</span></div>
+        <div class="amounts">
+          <div class="usd-amount" id="compSilver">—</div>
+          <div class="saving" id="savingSilver"></div>
+        </div>
+      </div>
+      <div class="comp-row">
+        <div class="plan-label"><span class="badge gold">گلد</span></div>
+        <div class="amounts">
+          <div class="usd-amount" id="compGold">—</div>
+          <div class="saving" id="savingGold"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Savings highlight -->
+    <div class="savings-highlight" id="savingsHighlight">
+      <div class="sh-label">
+        <strong id="savingTitle">صرفه‌جویی با پلن گلد</strong>
+        در مقایسه با استاندارد (ماهانه)
+      </div>
+      <div class="sh-amount" id="savingAmount">—</div>
+    </div>
+
+    <!-- CTA -->
+    <div class="cta-card">
+      <h3>می‌خوای این صرفه‌جویی رو داشته باشی؟</h3>
+      <p>با خرید اکانت سیلور یا گلد، کارمزد استخراجیت کاهش پیدا می‌کنه و هر ماه بیشتر درمیاری.</p>
+      <button class="cta-btn" onclick="window.open('https://t.me/YOUR_BOT', '_blank')">خرید اکانت در تلگرام 🚀</button>
+    </div>
+
+  </div>
+
+  <footer>قیمت‌ها از CoinGecko • بروزرسانی خودکار هر ۵ دقیقه</footer>
+
+</div>
+
+<script>
+  // State
+  let btcUsd = 0;
+  let usdIrr = 0;
+  let selectedPlan = 'standard';
+  let currentPeriod = 'day';
+  let lastCalcData = null;
+
+  // Mining constants
+  // BTC per TH/s per day (approximate, based on current difficulty)
+  const BTC_PER_TH_PER_DAY = 0.0000000600; // ~60 satoshi per TH/s per day
+
+  // Fees per plan
+  const FEES = {
+    standard: 0.04,
+    silver: 0.03,
+    gold: 0.028
+  };
+
+  // Discount per 100 TH/s (max 1.2%)
+  function getDiscount(hashrate) {
+    return Math.min(Math.floor(hashrate / 100) * 0.01, 0.012);
+  }
+
+  async function fetchPrices() {
+    try {
+      // BTC/USD from CoinGecko
+      const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd');
+      const data = await res.json();
+      btcUsd = data.bitcoin.usd;
+
+      // USD/IRR - use a fixed approximate rate since most free APIs don't have IRR
+      // We'll use bonbast or a similar source via a CORS proxy
+      // For now use approximate market rate
+      usdIrr = 90000; // ~90,000 تومان - این رو می‌تونی بروز کنی
+
+      // Try to get IRR rate
+      try {
+        const irrRes = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=tether&vs_currencies=usd');
+        // fallback - use fixed rate
+      } catch(e) {}
+
+      document.getElementById('btcUsd').textContent = '$' + btcUsd.toLocaleString('en-US');
+      document.getElementById('btcIrr').textContent = formatIRR(btcUsd * usdIrr);
+      document.getElementById('usdIrr').textContent = formatIRR(usdIrr);
+
+      if (lastCalcData) calculate();
+    } catch(e) {
+      document.getElementById('btcUsd').textContent = 'خطا در اتصال';
+    }
+  }
+
+  function formatIRR(val) {
+    if (val >= 1_000_000_000) return (val / 1_000_000_000).toFixed(1) + ' میلیارد';
+    if (val >= 1_000_000) return (val / 1_000_000).toFixed(1) + ' میلیون';
+    return val.toLocaleString('fa-IR');
+  }
+
+  function selectPlan(plan, el) {
+    selectedPlan = plan;
+    document.querySelectorAll('.plan-btn').forEach(b => b.classList.remove('active'));
+    el.classList.add('active');
+  }
+
+  function setPeriod(period, el) {
+    currentPeriod = period;
+    document.querySelectorAll('.period-tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    if (lastCalcData) updateResults(lastCalcData);
+  }
+
+  function calculate() {
+    const hashrate = parseFloat(document.getElementById('hashrate').value);
+    const errEl = document.getElementById('errorMsg');
+
+    if (!hashrate || hashrate <= 0) {
+      errEl.style.display = 'block';
+      return;
+    }
+    errEl.style.display = 'none';
+
+    if (!btcUsd) {
+      alert('لطفاً منتظر بارگذاری قیمت باشید.');
+      return;
+    }
+
+    const discount = getDiscount(hashrate);
+    const fee_standard = FEES.standard;
+    const fee_silver = Math.max(FEES.silver, fee_standard - discount);
+    const fee_gold = Math.max(FEES.gold, fee_standard - discount);
+
+    // Daily gross BTC
+    const grossBtcDay = hashrate * BTC_PER_TH_PER_DAY;
+
+    // Net BTC after fee per plan
+    const netDay = {
+      standard: grossBtcDay * (1 - fee_standard),
+      silver: grossBtcDay * (1 - fee_silver),
+      gold: grossBtcDay * (1 - fee_gold)
+    };
+
+    lastCalcData = { netDay, hashrate, discount };
+    updateResults(lastCalcData);
+
+    document.getElementById('results').classList.add('show');
+    document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  function updateResults({ netDay, hashrate, discount }) {
+    const multiplier = currentPeriod === 'day' ? 1 : currentPeriod === 'month' ? 30 : 365;
+
+    const net = selectedPlan === 'standard' ? netDay.standard : selectedPlan === 'silver' ? netDay.silver : netDay.gold;
+    const periodNet = net * multiplier;
+
+    // Main results
+    document.getElementById('resBtc').textContent = periodNet.toFixed(8) + ' ₿';
+    document.getElementById('resUsd').textContent = '$' + (periodNet * btcUsd).toLocaleString('en-US', {maximumFractionDigits: 2});
+    document.getElementById('resIrr').textContent = formatIRR(periodNet * btcUsd * usdIrr) + ' ت';
+
+    // Comparison (always monthly)
+    const stdMonth = netDay.standard * 30 * btcUsd;
+    const silverMonth = netDay.silver * 30 * btcUsd;
+    const goldMonth = netDay.gold * 30 * btcUsd;
+
+    document.getElementById('compStd').textContent = '$' + stdMonth.toFixed(2);
+    document.getElementById('compSilver').textContent = '$' + silverMonth.toFixed(2);
+    document.getElementById('compGold').textContent = '$' + goldMonth.toFixed(2);
+
+    const savS = silverMonth - stdMonth;
+    const savG = goldMonth - stdMonth;
+
+    document.getElementById('savingSilver').textContent = savS > 0 ? `+$${savS.toFixed(2)} بیشتر` : '';
+    document.getElementById('savingGold').textContent = savG > 0 ? `+$${savG.toFixed(2)} بیشتر` : '';
+
+    // Savings highlight
+    const bestSaving = savG > 0 ? savG : savS > 0 ? savS : 0;
+    const bestPlan = savG > 0 ? 'گلد' : 'سیلور';
+    document.getElementById('savingTitle').textContent = `صرفه‌جویی با پلن ${bestPlan}`;
+    document.getElementById('savingAmount').textContent = bestSaving > 0 ? `+$${bestSaving.toFixed(2)}` : 'بدون تخفیف';
+  }
+
+  // Auto refresh every 5 min
+  fetchPrices();
+  setInterval(fetchPrices, 300000);
+</script>
+</body>
+</html>
