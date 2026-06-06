@@ -670,29 +670,53 @@
 
   async function fetchPrices() {
     try {
-      // BTC/USD from CoinGecko
-      const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd');
+      // BTC/USD from Binance (supports CORS in browser)
+      const res = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT');
       const data = await res.json();
-      btcUsd = data.bitcoin.usd;
+      btcUsd = parseFloat(data.price);
 
-      // USD/IRR - use a fixed approximate rate since most free APIs don't have IRR
-      // We'll use bonbast or a similar source via a CORS proxy
-      // For now use approximate market rate
-      usdIrr = 90000; // ~90,000 تومان - این رو می‌تونی بروز کنی
-
-      // Try to get IRR rate
+      // نرخ USDT به تومان از نوبیتکس (POST request)
       try {
-        const irrRes = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=tether&vs_currencies=usd');
-        // fallback - use fixed rate
-      } catch(e) {}
+        const irrRes = await fetch('https://api.nobitex.ir/market/stats', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ srcCurrency: 'usdt', dstCurrency: 'rls' })
+        });
+        const irrData = await irrRes.json();
+        const rls = parseFloat(irrData.stats['usdt-rls'].latest);
+        usdIrr = Math.round(rls / 10); // تبدیل ریال به تومان
+      } catch(e) {
+        // fallback: از tgju استفاده کن
+        try {
+          const tgjuRes = await fetch('https://api.accessban.com/v1/market/indicator/summary-table-data/price_dollar_rl');
+          const tgjuData = await tgjuRes.json();
+          usdIrr = Math.round(parseFloat(tgjuData.data[0].p) / 10);
+        } catch(e2) {
+          usdIrr = 60000; // آخرین fallback
+        }
+      }
 
-      document.getElementById('btcUsd').textContent = '$' + btcUsd.toLocaleString('en-US');
-      document.getElementById('btcIrr').textContent = formatIRR(btcUsd * usdIrr);
-      document.getElementById('usdIrr').textContent = formatIRR(usdIrr);
+      document.getElementById('btcUsd').textContent = '$' + btcUsd.toLocaleString('en-US', {maximumFractionDigits: 0});
+      document.getElementById('btcIrr').textContent = formatIRR(Math.round(btcUsd * usdIrr));
+      document.getElementById('usdIrr').textContent = usdIrr.toLocaleString('fa-IR') + ' ت';
 
-      if (lastCalcData) calculate();
+      if (lastCalcData) updateResults(lastCalcData);
     } catch(e) {
-      document.getElementById('btcUsd').textContent = 'خطا در اتصال';
+      // fallback to CoinGecko
+      try {
+        const res2 = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd');
+        const data2 = await res2.json();
+        btcUsd = data2.bitcoin.usd;
+        usdIrr = 90000;
+        document.getElementById('btcUsd').textContent = '$' + btcUsd.toLocaleString('en-US', {maximumFractionDigits: 0});
+        document.getElementById('btcIrr').textContent = formatIRR(Math.round(btcUsd * usdIrr));
+        document.getElementById('usdIrr').textContent = usdIrr.toLocaleString('fa-IR') + ' ت';
+        if (lastCalcData) updateResults(lastCalcData);
+      } catch(e2) {
+        document.getElementById('btcUsd').textContent = 'خطا — دستی وارد کن';
+        document.getElementById('btcIrr').textContent = '—';
+        document.getElementById('usdIrr').textContent = '—';
+      }
     }
   }
 
